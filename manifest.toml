@@ -43,8 +43,8 @@ ram.runtime = "200M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/new-usemame/Calibre-Web-NextGen/archive/6979adbab4659ae6d4352bd061a7e8ef10f84319.tar.gz"
-    sha256 = "1f05eaf0342e6dab45c278eace9436c7a83ec33d22d7ec421ae2c6eb18ae330a"
+    url = "https://github.com/new-usemame/Calibre-Web-NextGen/archive/ad54932b135a7b878d0e22c339982cb845e37197.tar.gz"
+    sha256 = "0507289e6415dcadca15a388e984b09c7a7f812ea1ad319445977dc9501771cf"
 
     autoupdate.strategy = "latest_github_release"
     autoupdate.version_regex = "^[vV](.*)$"

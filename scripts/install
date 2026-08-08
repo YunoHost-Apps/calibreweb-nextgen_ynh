@@ -158,6 +158,8 @@ ynh_script_progression "Updating database with the right values..."
 
 #ls -lah /config
 ls -lah $install_dir
+ls -lah $install_dir/build
+ls -lah $install_dir/build/config
 ls -lah $install_dir/config
 
 _ynh_adapt_cwng_db

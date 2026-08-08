@@ -96,8 +96,6 @@ ynh_config_add_nginx
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression "Starting patching operations..."
-_ynh_patch_cwa
 
 ynh_script_progression "Building frontend..."
 

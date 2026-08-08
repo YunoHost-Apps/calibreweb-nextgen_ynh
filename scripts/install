@@ -156,6 +156,7 @@ ynh_config_add_fail2ban --logpath="$log_file" --failregex="^.*LDAP Login failed 
 #=================================================
 ynh_script_progression "Updating database with the right values..."
 
+ls -lah /config
 ls -lah $install_dir
 ls -lah $install_dir/build
 ls -lah $install_dir/build/config

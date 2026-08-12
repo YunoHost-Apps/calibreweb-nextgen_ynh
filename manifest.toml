@@ -49,6 +49,15 @@ ram.runtime = "200M"
     autoupdate.strategy = "latest_github_release"
     autoupdate.version_regex = "^[vV](.*)$"
 
+    [resources.sources.kosync]
+    url = "https://github.com/new-usemame/cwasync.koplugin/releases/download/v4.1.33/cwasync.koplugin.zip"
+    sha256 = "76970663ab55aedd972a51e14efbfee6292f1a109fa0d74356c94cddd7ee9a1e"
+
+    extract = false
+    rename = "koplugin.zip"
+    autoupdate.upstream = "https://github.com/new-usemame/cwasync.koplugin"
+    autoupdate.strategy = "latest_github_release"
+
     [resources.sources.calibre]
     amd64.url = "https://github.com/YunoHost-Apps/calibreweb-automated_ynh/releases/download/v9.13.0/calibre-9.13.0-x86_64.txz"
     amd64.sha256 = "d664fe74953463f1b679945a5460234b61cbf539da48fc78f2111ff8d9503cc0"

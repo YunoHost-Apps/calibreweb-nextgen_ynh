@@ -124,10 +124,10 @@ pushd "$install_dir/build/scripts"
   CALIBRE_DBPATH="$install_dir/config" $install_dir/build/venv/bin/python3 auto_library.py
 popd
 
-ynh_script_progression "Creating koplugin.zip from KOReader plugin folder......"
-_ynh_create_koplugin
+ynh_script_progression "Add the koreader kosync extension..."
+ynh_setup_source --dest_dir="$install_dir/build/koreader/plugins" --source_id="kosync"
 
-chown -R $app:$app $install_dir
+chown -R $app:$app "$install_dir"
 
 # Remove unneeded files
 ynh_safe_rm "$install_dir/build/.github"

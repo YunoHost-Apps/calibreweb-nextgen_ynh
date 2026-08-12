@@ -10,32 +10,6 @@ path_with_calibre="$install_dir/tools/calibre:$install_dir/bin:$data_dir/bin:$PA
 log_file=/var/log/$app/$app.log
 access_log_file=/var/log/$app/$app-access.log
 
-_ynh_create_koplugin() {
- if [ -d "$install_dir/build/koreader/plugins/cwasync.koplugin" ]; then \
-    cd $install_dir/build/koreader/plugins && \
-    # Calculate digest of all files in the plugin for debugging purposes
-    PLUGIN_DIGEST=$(find cwasync.koplugin -type f -name "*.lua" -o -name "*.json" | sort | xargs sha256sum | sha256sum | cut -d' ' -f1) && \
-    echo "Plugin digest: $PLUGIN_DIGEST" && \
-    # Create a file named after the digest inside the plugin folder
-    echo "Plugin files digest: $PLUGIN_DIGEST" > cwasync.koplugin/${PLUGIN_DIGEST}.digest && \
-    echo "Build date: $(date)" >> cwasync.koplugin/${PLUGIN_DIGEST}.digest && \
-    echo "Files included:" >> cwasync.koplugin/${PLUGIN_DIGEST}.digest && \
-    find cwasync.koplugin -type f -name "*.lua" -o -name "*.json" | sort >> cwasync.koplugin/${PLUGIN_DIGEST}.digest && \
-    zip -r koplugin.zip cwasync.koplugin/ && \
-    echo "Created koplugin.zip from cwasync.koplugin folder with digest file: ${PLUGIN_DIGEST}.digest"; \
-  else \
-    echo "Warning: cwasync.koplugin folder not found, skipping zip creation"; \
-  fi && \
-  	# Move koplugin.zip to static directory
-  if [ -f "$install_dir/build/koreader/plugins/koplugin.zip" ]; then \
-    mkdir -p $install_dir/build/cps/static && \
-    cp $install_dir/build/koreader/plugins/koplugin.zip $install_dir/build/cps/static/ && \
-    echo "Moved koplugin.zip to static directory"; \
-  else \
-    echo "Warning: koplugin.zip not found, skipping move to static directory"; \
-  fi
-}
-
 _ynh_adapt_cwng_db() {
   # Correct path of binaries
   sqlite3 $install_dir/config/app.db "UPDATE settings SET config_kepubifypath='$install_dir/tools/kepubify'"

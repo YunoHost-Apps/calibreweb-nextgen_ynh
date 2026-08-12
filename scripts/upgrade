@@ -82,7 +82,7 @@ fi
 #Setting the proxy authentication in case calibre is not open to visitor.
 #https://github.com/janeczku/calibre-web/wiki/Setup-Reverse-Proxy#login-via-header-from-upstream-authentication-source
 if $(ynh_permission_has_user --permission=main --user=visitors); then
-	sqlite3 $install_dir/build/config/app.db "UPDATE settings SET config_reverse_proxy_login_header_name='', config_allow_reverse_proxy_header_login=0 WHERE ID=1;"
+	sqlite3 $install_dir/config/app.db "UPDATE settings SET config_reverse_proxy_login_header_name='', config_allow_reverse_proxy_header_login=0 WHERE ID=1;"
 	ynh_replace --match="        proxy_set_header	X-Remote-User" \
 	            --replace="#       proxy_set_header	X-Remote-User" \
 	            --file="../conf/nginx.conf"

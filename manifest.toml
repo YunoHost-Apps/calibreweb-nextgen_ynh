@@ -6,7 +6,7 @@ id = "calibreweb-nextgen"
 name = "Calibre-Web-NextGen"
 description.en = "Fully automate and simplify your eBook set up"
 
-version = "4.1.32~ynh1"
+version = "4.1.33~ynh1"
 
 maintainers = ["Thovi98"]
 

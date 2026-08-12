@@ -15,7 +15,7 @@ get__calibre_library_dir() {
 
 set__calibre_library_dir() {
     ynh_app_setting_set --key=calibre_library_dir --value="$calibre_library_dir"
-    sqlite3 $install_dir/build/config/app.db "UPDATE settings SET config_calibre_dir='$calibre_library_dir'"
+    sqlite3 $install_dir/config/app.db "UPDATE settings SET config_calibre_dir='$calibre_library_dir'"
 }
 
 #=================================================

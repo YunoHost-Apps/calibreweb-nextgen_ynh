@@ -122,7 +122,7 @@ chmod +x "$install_dir/build/scripts/"*.py || true
 chmod 775 "$install_dir/build/cps/"*.py || true
 
 pushd "$install_dir/build/scripts"
-  $install_dir/build/venv/bin/python3 auto_library.py
+  CALIBRE_DBPATH="$install_dir/build/config" $install_dir/build/venv/bin/python3 auto_library.py
 popd
 
 ynh_script_progression "Creating koplugin.zip from KOReader plugin folder......"

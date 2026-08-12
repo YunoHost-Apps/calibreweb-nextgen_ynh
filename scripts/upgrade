@@ -129,6 +129,35 @@ _ynh_create_koplugin
 
 chown -R $app:$app $install_dir
 
+# Remove unneeded files
+ynh_safe_rm "$install_dir/build/.github"
+ynh_safe_rm "$install_dir/build/README_images"
+ynh_safe_rm "$install_dir/build/docs"
+ynh_safe_rm "$install_dir/build/drafts"
+ynh_safe_rm "$install_dir/build/examples"
+ynh_safe_rm "$install_dir/build/findings"
+ynh_safe_rm "$install_dir/build/homepage"
+ynh_safe_rm "$install_dir/build/kubernetes"
+ynh_safe_rm "$install_dir/build/notes"
+ynh_safe_rm "$install_dir/build/state"
+ynh_safe_rm "$install_dir/build/tests"
+ynh_safe_rm "$install_dir/build/wiki-src"
+ynh_safe_rm "$install_dir/build/wiki_images"
+ynh_safe_rm "$install_dir/build/wikisite"
+ynh_safe_rm "$install_dir/build/.dockerignore"
+ynh_safe_rm "$install_dir/build/.editorconfig"
+ynh_safe_rm "$install_dir/build/.gitattributes"
+ynh_safe_rm "$install_dir/build/.gitignore"
+ynh_safe_rm "$install_dir/build/AI_README.md"
+ynh_safe_rm "$install_dir/build/CONTRIBUTING.md"
+ynh_safe_rm "$install_dir/build/docker-compose.yml"
+ynh_safe_rm "$install_dir/build/docker-compose.yml.dev"
+ynh_safe_rm "$install_dir/build/greptile.json"
+ynh_safe_rm "$install_dir/build/messages.pot"
+ynh_safe_rm "$install_dir/build/pytest.ini"
+ynh_safe_rm "$install_dir/build/run_tests.sh"
+#ynh_safe_rm "$install_dir/build/"
+
 #=================================================
 # SETUP LOGROTATE
 #=================================================

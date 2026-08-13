@@ -126,7 +126,7 @@ pushd "$install_dir/build/scripts"
 popd
 
 ynh_script_progression "Add the koreader kosync extension..."
-ynh_setup_source --dest_dir="$install_dir/build/koreader/plugins" --source_id="kosync"
+ynh_setup_source --dest_dir="$install_dir/build/cps/static" --source_id="kosync"
 
 chown -R $app:$app "$install_dir"
 

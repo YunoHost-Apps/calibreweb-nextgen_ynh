@@ -22,15 +22,13 @@ ynh_systemctl --service="${app}" --action="stop"
 #=================================================
 ynh_script_progression "Setting up source files..."
 
-ynh_script_progression "Setting up cwng..."
+# CWNG sources
 ynh_setup_source --dest_dir="$install_dir/build" --full_replace=1
 
 # Install kepubify converter
-ynh_script_progression "Setting up kepubify..."
 ynh_setup_source --dest_dir="$install_dir/tools" --source_id="kepubify" --full_replace=1
 
 # Install Calibre
-ynh_script_progression "Setting up Calibre..."
 ynh_setup_source --dest_dir="$install_dir/tools/calibre" --source_id="calibre"
 
 pushd "$install_dir/tools/calibre"

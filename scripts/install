@@ -26,8 +26,6 @@ timezone=$(timedatectl show --value --property=Timezone)
 #=================================================
 ynh_script_progression "Setting up source files..."
 
-ynh_script_progression "Setting up $app sources..."
-
 # CWNG sources
 ynh_setup_source --dest_dir="$install_dir/build"
 

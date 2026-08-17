@@ -119,7 +119,7 @@ chmod +x "$install_dir/build/scripts/"*.py || true
 chmod 775 "$install_dir/build/cps/"*.py || true
 
 pushd "$install_dir/build/scripts"
-  ynh_hide_warnings CALIBRE_DBPATH="$install_dir/config" $install_dir/build/venv/bin/python3 auto_library.py
+  CALIBRE_DBPATH="$install_dir/config" $install_dir/build/venv/bin/python3 auto_library.py
 popd
 
 ynh_script_progression "Add the koreader kosync extension..."

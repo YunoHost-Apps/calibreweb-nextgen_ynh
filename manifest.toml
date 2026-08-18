@@ -43,15 +43,15 @@ ram.runtime = "200M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/chloeroform/Calibre-Web-NextGen/archive/28552b5d68b81dfc4f9f4d7b4a1a5535077773f9.tar.gz"
-    sha256 = "5412d3c09ad527ae9b9d0a0be9b4fce683c179a69159f77b45a382a7d0c78641"
+    url = "https://github.com/new-usemame/Calibre-Web-NextGen/archive/refs/tags/v4.1.38.tar.gz"
+    sha256 = "8cf122f5410fa6b97dd040b9b6b19aecedd0b7c1444d331be3335542d19a909d"
 
     autoupdate.strategy = "latest_github_release"
     autoupdate.version_regex = "^[vV](.*)$"
 
     [resources.sources.kosync]
-    url = "https://github.com/new-usemame/cwasync.koplugin/releases/download/v4.1.33/cwasync.koplugin.zip"
-    sha256 = "76970663ab55aedd972a51e14efbfee6292f1a109fa0d74356c94cddd7ee9a1e"
+    url = "https://github.com/new-usemame/cwasync.koplugin/releases/download/v4.1.37/cwasync.koplugin.zip"
+    sha256 = "ca366c884896e64cf8b594cd5a67684874c59d3bf12f04f5d57e5a62f257667a"
 
     extract = false
     rename = "koplugin.zip"
@@ -74,7 +74,7 @@ ram.runtime = "200M"
 
     [resources.sources.kepubify]
     arm64.url = "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm64"
-    arm64.sha256="5a15b8f6f6a96216c69330601bca29638cfee50f7bf48712795cff88ae2d03a3"
+    arm64.sha256= "5a15b8f6f6a96216c69330601bca29638cfee50f7bf48712795cff88ae2d03a3"
     armhf.url = "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-arm"
     armhf.sha256 = "07f23275c4e674093443f01a591aa0980b0b87dbb0a10986d5001e9d56b0e1e7"
     i386.url = "https://github.com/pgaskin/kepubify/releases/download/v4.0.4/kepubify-linux-32bit"

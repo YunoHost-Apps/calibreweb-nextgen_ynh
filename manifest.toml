@@ -95,8 +95,7 @@ ram.runtime = "200M"
     [resources.install_dir]
 
     [resources.data_dir]
-    subdirs = [ "eBook" ]
-
+    subdirs = [ "eBook", "ingest" ]
 
     [resources.permissions]
     main.url = "/"

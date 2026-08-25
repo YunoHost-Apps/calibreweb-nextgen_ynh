@@ -1,0 +1,5 @@
+{
+    "ingest_folder": "__DATA_DIR__/eBook",
+    "calibre_library_dir": "__CALIBRE_LIBRARY_DIR__",
+    "tmp_conversion_dir": "__INSTALL_DIR__/config/.cwa_conversion_tmp"
+}

@@ -9,7 +9,7 @@ Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/build
 Environment="PATH=__PATH_WITH_CALIBRE__"
 EnvironmentFile=__INSTALL_DIR__/.env
-ExecStart=/bin/sh -c '__INSTALL_DIR__/build/venv/bin/python3 __INSTALL_DIR__/build/cps.py'
+ExecStart=__INSTALL_DIR__/build/venv/bin/python3 __INSTALL_DIR__/build/cps.py
 StandardOutput=append:/var/log/__APP__/__APP__.log
 StandardError=append:/var/log/__APP__/__APP__.log
 

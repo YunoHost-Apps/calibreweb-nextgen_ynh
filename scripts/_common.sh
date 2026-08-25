@@ -5,7 +5,7 @@
 #=================================================
 
 # Path for the service to retrieve the Calibre tools
-path_with_calibre="$install_dir/tools/calibre:$install_dir/bin:$data_dir/bin:$PATH"
+path_with_calibre="$install_dir/tools/calibre:$install_dir/build/venv/bin:$data_dir/bin:$PATH"
 
 log_file=/var/log/$app/$app.log
 access_log_file=/var/log/$app/$app-access.log

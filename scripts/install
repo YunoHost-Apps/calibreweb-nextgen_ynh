@@ -58,10 +58,6 @@ ynh_script_progression "Adding $app's configuration files..."
 
 ynh_config_add --template=".env" --destination="$install_dir/.env"
 
-# Until dirs.json is removed from upstream
-ynh_safe_rm "$install_dir/build/dirs.json"
-ynh_config_add --template="dirs.json" --destination="$install_dir/build/dirs.json"
-
 ynh_replace --match="engine = _session.bind" --replace="engine = _session.bind\n    create_admin_user(_session)" --file="$install_dir/build/cps/ub.py"
 
 #Use sed because the command with ynh_replace doesn’t appear to change anything, and so was the previous patch

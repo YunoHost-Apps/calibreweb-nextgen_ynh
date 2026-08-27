@@ -110,7 +110,6 @@ pushd "$install_dir/build"
 	ynh_hide_warnings ynh_exec_as_app "$install_dir/build/venv/bin/pip" install --upgrade wheel pip setuptools
 	ynh_hide_warnings ynh_exec_as_app "$install_dir/build/venv/bin/pip" install --no-cache-dir --upgrade --use-pep517 --only-deps "$install_dir/build"
 
-
 	# Compile translations, otherwise we only have English
 	ynh_hide_warnings bash scripts/compile_translations.sh
 popd
@@ -118,7 +117,6 @@ popd
 chmod +x "$install_dir/build/scripts/"*.sh || true
 chmod +x "$install_dir/build/scripts/"*.py || true
 chmod 775 "$install_dir/build/cps/"*.py || true
-
 
 #=================================================
 # LAUNCH SCRIPTS
@@ -138,7 +136,8 @@ set +a
 ynh_script_progression "Add the koreader kosync extension..."
 ynh_setup_source --dest_dir="$install_dir/build/cps/static" --source_id="kosync"
 
-chown -R $app:$app "$install_dir"
+chown -R "$app":"$app" "$install_dir"
+chown -R "$app":"$app" "$data_dir"
 
 #=================================================
 # REMOVE UNNEEDED FILES

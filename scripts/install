@@ -7,190 +7,235 @@
 source _common.sh
 source /usr/share/yunohost/helpers
 
-### Install parameters are automatically saved as settings
-###
-### Settings are automatically loaded as bash variables
-### in every app script context, therefore typically these will exist:
-### - $domain
-### - $path
-### - $language
-### ... etc
-###
-### Resources defined in the manifest are provisioned prior to this script
-### and corresponding settings are also available, such as:
-### - $install_dir
-### - $port
-### - $db_name
-### ...
-###
-### $app is the app id (i.e. 'example' for first install,
-### or 'example__2', '__3'... for multi-instance installs)
-
 #=================================================
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
-# If you need to, you can define custom settings
-# (or remove this section entirely if not relevant for you)
-foo="bar"
-ynh_app_setting_set --key=foo --value=$foo
+admin_mail=$(ynh_user_get_info --username="$admin" --key=mail)
 
-ynh_app_setting_set --key=php_upload_max_filesize --value=50M
-ynh_app_setting_set --key=php_post_max_size --value=50M
+calibre_library_dir="$data_dir/eBook"
+ynh_app_setting_set --key="calibre_library_dir" --value="$calibre_library_dir"
+
+calibre_config_directory="$install_dir/config/.config/calibre"
+ynh_app_setting_set --key=calibre_config_directory --value=$calibre_config_directory
+
+timezone=$(timedatectl show --value --property=Timezone)
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression "Setting up source files..."
 
-### `ynh_setup_source` is used to install an app from a zip or tar.gz file,
-### downloaded from an upstream source, like a git repository.
-### `ynh_setup_source` use the file manifest.toml
+# CWNG sources
+ynh_setup_source --dest_dir="$install_dir/build"
 
-# Download, check integrity, uncompress and patch the source from manifest.toml
-ynh_setup_source --dest_dir="$install_dir"
+# Install kepubify converter
+ynh_setup_source --dest_dir="$install_dir/tools" --source_id="kepubify"
 
-### $install_dir will automatically be initialized with some decent
-### permission by default... however, you may need to recursively reapply
-### ownership to all files such as after the ynh_setup_source step
-chown -R "$app:www-data" "$install_dir"
+# Install Calibre
+ynh_setup_source --dest_dir="$install_dir/tools/calibre" --source_id="calibre"
+
+pushd "$install_dir/tools/calibre"
+	tar -xvf calibre.txz
+popd
+
+chown -R $app:$app $install_dir
+chmod -R 770 $install_dir/tools
+
+#=================================================
+# CREATE FILES AND DIRECTORIES
+#=================================================
+ynh_script_progression "Creating files and directory..."
+
+#build multimedia directory
+ynh_multimedia_build_main_dir
+ynh_multimedia_addaccess $app
 
 #=================================================
 # APP INITIAL CONFIGURATION
 #=================================================
 ynh_script_progression "Adding $app's configuration files..."
 
-### You can add specific configuration files.
-###
-### Typically, put your template conf file in ../conf/your_config_file
-### The template may contain strings such as __FOO__ or __FOO_BAR__,
-### which will automatically be replaced by the values of $foo and $foo_bar
-###
-### ynh_config_add will also keep track of the config file's checksum,
-### which later during upgrade may allow to automatically backup the config file
-### if it's found that the file was manually modified
-###
-### Check the documentation of `ynh_config_add` for more info.
+ynh_config_add --template=".env" --destination="$install_dir/.env"
 
-ynh_config_add --template="some_config_file" --destination="$install_dir/some_config_file"
+ynh_replace --match="engine = _session.bind" --replace="engine = _session.bind\n    create_admin_user(_session)" --file="$install_dir/build/cps/ub.py"
 
-# FIXME: this should be handled by the core in the future
-### You may need to use chmod 600 instead of 400,
-### for example if the app is expected to be able to modify its own config
-chmod 400 "$install_dir/some_config_file"
-chown "$app:$app" "$install_dir/some_config_file"
-
-### For more complex cases where you want to replace stuff using regexes,
-### you shoud rely on ynh_replace (which is basically a wrapper for sed)
-### When doing so, you also need to manually call ynh_store_file_checksum
-###
-### ynh_replace --match="match_string" --replace="replace_string" --file="$install_dir/some_config_file"
-### ynh_store_file_checksum "$install_dir/some_config_file"
+#Use sed because the command with ynh_replace doesn’t appear to change anything, and so was the previous patch
+#ynh_replace --match="user.name = "admin"\n    user.email = "admin@example.org"\n    user.role = constants.ADMIN_USER_ROLES" --replace="user.name = "$admin"\n    user.email = "$admin_mail"\n    user.role = constants.ADMIN_USER_ROLES" --file="$install_dir/build/cps/ub.py"
+sed -i \
+    -e "s/user\.name = \"admin\"/user.name = \"$admin\"/" \
+    -e "s/user\.email = \"admin@example\.org\"/user.email = \"$admin_mail\"/" \
+    "$install_dir/build/cps/ub.py"
 
 #=================================================
-# SYSTEM CONFIGURATION
+# NGINX CONFIGURATION
 #=================================================
-ynh_script_progression "Adding system configurations related to $app..."
+ynh_script_progression "Setting up system configuration..."
 
-### `ynh_config_add_phpfpm` is used to set up a PHP config.
-### You can remove it if your app doesn't use PHP.
-### `ynh_config_add_phpfpm` will use the files conf/extra_php-fpm.conf
-### If you're not using these lines:
-###   - You can remove these files in conf/.
-###   - Remove the section "BACKUP THE PHP-FPM CONFIGURATION" in the backup script
-###   - Remove also the section "REMOVE PHP-FPM CONFIGURATION" in the remove script
-###   - As well as the section "RESTORE THE PHP-FPM CONFIGURATION" in the restore script
-###     with the reload at the end of the script.
-###   - And the section "PHP-FPM CONFIGURATION" in the upgrade script
+#Cannot use empty string for X-script-name, causes an issue in the python prg
+#https://github.com/janeczku/calibre-web/wiki/Setup-Reverse-Proxy#nginx
+if [ $path = "/" ] ; then
+	ynh_replace --match="        proxy_set_header	X-Script-Name		__PATH__;" \
+	            --replace="        proxy_set_header	X-Script-Name		/__PATH__;" \
+	            --file="../conf/nginx.conf"
+fi
 
-# Create a PHP-FPM config (with conf/extra_php-fpm.conf being appended to it)
-ynh_config_add_phpfpm
+#
+if $(ynh_permission_has_user --permission=main --user=visitors); then
+	ynh_replace --match="        proxy_set_header	X-Remote-User" \
+	            --replace="#       proxy_set_header	X-Remote-User" \
+	            --file="../conf/nginx.conf"
+fi
 
-# Create a dedicated NGINX config using the conf/nginx.conf template
+# Create a dedicated nginx config
 ynh_config_add_nginx
 
-### `ynh_config_add_systemd` is used to configure a systemd script for an app.
-### It can be used for apps that use sysvinit (with adaptation) or systemd.
-### Have a look at the app to be sure this app needs a systemd script.
-### `ynh_config_add_systemd` will use the file conf/systemd.service
-### If you're not using these lines:
-###   - You can remove those files in conf/.
-###   - Remove the section "BACKUP SYSTEMD" in the backup script
-###   - Remove also the section "STOP AND REMOVE SERVICE" in the remove script
-###   - As well as the section "RESTORE SYSTEMD" in the restore script
-###   - And the section "SETUP SYSTEMD" in the upgrade script
 
-# Create a dedicated systemd config
-ynh_config_add_systemd
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
 
-### `yunohost service add` integrates a service in YunoHost. It then gets
-### displayed in the admin interface and through the others `yunohost service` commands.
-### (N.B.: this line only makes sense if the app adds a service to the system!)
-### If you're not using these lines:
-###   - You can remove these files in conf/.
-###   - Remove the section "REMOVE SERVICE INTEGRATION IN YUNOHOST" in the remove script
-###   - As well as the section "INTEGRATE SERVICE IN YUNOHOST" in the restore script
-###   - And the section "INTEGRATE SERVICE IN YUNOHOST" in the upgrade script
+ynh_script_progression "Building frontend..."
 
-### Additional options starting with 3.8:
-###
-### --needs_exposed_ports "$port" a list of ports that needs to be publicly exposed
-###                               which will then be checked by YunoHost's diagnosis system
-###                               (N.B. DO NOT USE THIS if the port is only internal!!!)
-###
-### --test_status "some command"  a custom command to check the status of the service
-###                               (only relevant if 'systemctl status' doesn't do a good job)
-###
-### --test_conf "some command"    some command similar to "nginx -t" that validates the conf of the service
-###
-### Re-calling 'yunohost service add' during the upgrade script is the right way
-### to proceed if you later realize that you need to enable some flags that
-### weren't enabled on old installs (be careful it'll override the existing
-### service though so you should re-provide all relevant flags when doing so)
-yunohost service add "$app" --description="A short description of the app" --log="/var/log/$app/$app.log"
+pushd "$install_dir"/build/frontend
+	ynh_hide_warnings ynh_exec_as_app npm ci --quiet
+	ynh_hide_warnings ynh_exec_as_app npm run build
+	ynh_hide_warnings ynh_exec_as_app NODE_ENV=production npm cache clean --force
+popd
 
-### `ynh_config_add_logrotate` is used to configure a logrotate configuration for the logs of this app.
-### Use this helper only if there is effectively a log file for this app.
-### If you're not using this helper:
-###   - Remove the section "BACKUP LOGROTATE" in the backup script
-###   - Remove also the section "REMOVE LOGROTATE CONFIGURATION" in the remove script
-###   - As well as the section "RESTORE THE LOGROTATE CONFIGURATION" in the restore script
-###   - And the section "SETUP LOGROTATE" in the upgrade script
+ynh_script_progression "Building backend..."
 
+pushd "$install_dir/build"
+	ynh_exec_as_app python3 -m venv "$install_dir/build/venv"
+	ynh_hide_warnings ynh_exec_as_app "$install_dir/build/venv/bin/pip" install --upgrade wheel pip setuptools
+	ynh_hide_warnings ynh_exec_as_app "$install_dir/build/venv/bin/pip" install --no-cache-dir --upgrade --use-pep517 --only-deps "$install_dir/build"
+
+	# Compile translations, otherwise we only have English
+	ynh_hide_warnings bash scripts/compile_translations.sh
+popd
+
+chmod +x "$install_dir/build/scripts/"*.sh || true
+chmod +x "$install_dir/build/scripts/"*.py || true
+chmod 775 "$install_dir/build/cps/"*.py || true
+
+#=================================================
+# LAUNCH SCRIPTS
+#=================================================
+set -a
+
+source $install_dir/.env
+
+ynh_hide_warnings $install_dir/build/venv/bin/python3 "$install_dir/build/scripts/auto_library.py"
+
+set +a
+
+#=================================================
+# INSTALL KOSYNC EXTENSION
+#=================================================
+
+ynh_script_progression "Add the koreader kosync extension..."
+ynh_setup_source --dest_dir="$install_dir/build/cps/static" --source_id="kosync"
+
+chown -R "$app":"$app" "$install_dir"
+chown -R "$app":"$app" "$data_dir"
+
+#=================================================
+# REMOVE UNNEEDED FILES
+#=================================================
+
+ynh_script_progression "Cleanup installation..."
+
+ynh_safe_rm "$install_dir/build/.github"
+ynh_safe_rm "$install_dir/build/README_images"
+ynh_safe_rm "$install_dir/build/changelogs"
+ynh_safe_rm "$install_dir/build/docs"
+ynh_safe_rm "$install_dir/build/drafts"
+ynh_safe_rm "$install_dir/build/examples"
+ynh_safe_rm "$install_dir/build/feedback-server"
+ynh_safe_rm "$install_dir/build/findings"
+ynh_safe_rm "$install_dir/build/homepage"
+ynh_safe_rm "$install_dir/build/kubernetes"
+ynh_safe_rm "$install_dir/build/notes"
+ynh_safe_rm "$install_dir/build/state"
+ynh_safe_rm "$install_dir/build/tests"
+ynh_safe_rm "$install_dir/build/wiki-src"
+ynh_safe_rm "$install_dir/build/wiki_images"
+ynh_safe_rm "$install_dir/build/wikisite"
+ynh_safe_rm "$install_dir/build/.dockerignore"
+ynh_safe_rm "$install_dir/build/.editorconfig"
+ynh_safe_rm "$install_dir/build/.gitattributes"
+ynh_safe_rm "$install_dir/build/.gitignore"
+ynh_safe_rm "$install_dir/build/AI_README.md"
+ynh_safe_rm "$install_dir/build/CHANGELOG.md"
+ynh_safe_rm "$install_dir/build/CHANGES-vs-upstream.md"
+ynh_safe_rm "$install_dir/build/CONTRIBUTING.md"
+ynh_safe_rm "$install_dir/build/CONTRIBUTORS"
+ynh_safe_rm "$install_dir/build/Dockerfile"
+ynh_safe_rm "$install_dir/build/GOVERNANCE.md"
+ynh_safe_rm "$install_dir/build/LICENSE"
+ynh_safe_rm "$install_dir/build/README.md"
+ynh_safe_rm "$install_dir/build/SECURITY.md"
+ynh_safe_rm "$install_dir/build/babel.cfg"
+ynh_safe_rm "$install_dir/build/build.sh"
+ynh_safe_rm "$install_dir/build/docker-compose.yml"
+ynh_safe_rm "$install_dir/build/docker-compose.yml.dev"
+ynh_safe_rm "$install_dir/build/greptile.json"
+ynh_safe_rm "$install_dir/build/messages.pot"
+ynh_safe_rm "$install_dir/build/pytest.ini"
+ynh_safe_rm "$install_dir/build/run_tests.sh"
+  
+#=================================================
+# SETUP LOGROTATE
+#=================================================
 # Use logrotate to manage application logfile(s)
-ynh_config_add_logrotate
+ynh_config_add_logrotate "$log_file"
+ynh_config_add_logrotate "$access_log_file"
+
+#=================================================
+# SETUP FAIL2BAN
+#=================================================
+ynh_script_progression "Configuring Fail2Ban..."
+
+# Make sure a log file exists (mostly for CI tests)
+ if [ ! -f "$log_file" ]; then
+	touch "$log_file"
+	chown $app: "$log_file"
+fi
 
 # Create a dedicated Fail2Ban config
-ynh_config_add_fail2ban --logpath="/var/log/nginx/${domain}-error.log" --failregex="Regex to match into the log for a failed login"
+ynh_config_add_fail2ban --logpath="$log_file" --failregex="^.*LDAP Login failed for user .* IP-address: <HOST>.*$"
 
 #=================================================
-# SETUP APPLICATION WITH CURL
+# UPDATE DATABASE
 #=================================================
+ynh_script_progression "Updating database with the right values..."
 
-### Use these lines only if the app installation needs to be finalized through
-### web forms. We generally don't want to ask the final user,
-### so we're going to use curl to automatically fill the fields and submit the
-### forms.
-
-# Installation with curl
-ynh_script_progression "Finalizing installation..."
-ynh_local_curl "/INSTALL_PATH" "key1=value1" "key2=value2" "key3=value3"
+_ynh_adapt_cwng_db
 
 #=================================================
-# START SYSTEMD SERVICE
+# SETUP SYSTEMD
 #=================================================
-ynh_script_progression "Starting $app's systemd service..."
 
-### `ynh_systemctl` is used to start a systemd service for an app.
-### Only needed if you have configure a systemd service
-### If you're not using these lines:
-###   - Remove the section "STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the backup script
-###   - As well as the section "START SYSTEMD SERVICE" in the restore script
-###   - As well as the section"STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the upgrade script
-###   - And the section "STOP SYSTEMD SERVICE" and "START SYSTEMD SERVICE" in the change_url script
+# Create a dedicated systemd config
+ynh_config_add_systemd --service="${app}" --template="systemd.service"
 
-# Start a systemd service
-ynh_systemctl --service="$app" --action="start"
+yunohost service add "${app}" --description="Calibre-Web-NextGen Browse eBook on the web" --log="$log_file"
+
+#=================================================
+# STARTING APP
+#=================================================
+ynh_script_progression "Start $app..."
+
+ynh_systemctl --service="${app}" --action="start" --wait_until="Starting Gevent server on" -t 60
+
+#Setting the proxy authentication in case calibre is not open to visitor.
+#https://github.com/janeczku/calibre-web/wiki/Setup-Reverse-Proxy#login-via-header-from-upstream-authentication-source
+#We need to update the sso login parameter, but for that the app needs to have run at least once to initialize the tables.
+if ! $(ynh_permission_has_user --permission=main --user=visitors); then
+	ynh_systemctl --service=$app --action="stop"
+	sqlite3 $install_dir/config/app.db "UPDATE settings SET config_reverse_proxy_login_header_name='X-Remote-User', config_allow_reverse_proxy_header_login='True', config_allow_reverse_proxy_header_login=1 WHERE ID=1;"
+	ynh_systemctl --service=$app --action="start" --wait_until="Starting Gevent server on"
+fi
 
 #=================================================
 # END OF SCRIPT

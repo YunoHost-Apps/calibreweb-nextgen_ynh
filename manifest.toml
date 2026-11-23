@@ -6,7 +6,7 @@ id = "calibreweb-nextgen"
 name = "Calibre-Web-NextGen"
 description.en = "Fully automate and simplify your eBook set up"
 
-version = "4.1.33~ynh1"
+version = "4.1.73~ynh1"
 
 maintainers = ["Thovi98"]
 
@@ -43,29 +43,29 @@ ram.runtime = "200M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/new-usemame/Calibre-Web-NextGen/archive/c11e21392b80c884d9a3d4b792ba5269a8ffb696.tar.gz"
-    sha256 = "5f4355ed78c65ab0de418e032496c36d0f2a40a1567db6cacce09e6235fbd5c7"
+    url = "https://github.com/new-usemame/Calibre-Web-NextGen/archive/refs/tags/v4.1.73.tar.gz"
+    sha256 = "efb0eede7e936ac8b7a128e77e5f5154ddd298afbf645e877dc73c441bd69e51"
 
     autoupdate.strategy = "latest_github_release"
     autoupdate.version_regex = "^[vV](.*)$"
 
     [resources.sources.kosync]
-    url = "https://github.com/new-usemame/cwasync.koplugin/releases/download/v4.1.37/cwasync.koplugin.zip"
-    sha256 = "ca366c884896e64cf8b594cd5a67684874c59d3bf12f04f5d57e5a62f257667a"
+    url = "https://github.com/new-usemame/cwngsync.koplugin/releases/download/v4.1.71/cwngsync.koplugin.zip"
+    sha256 = "42a41eea7553eda3c966bfe7a0aeb5c1c8f7b3b58d23474684db6039fc5897ca"
 
     extract = false
     rename = "koplugin.zip"
-    autoupdate.upstream = "https://github.com/new-usemame/cwasync.koplugin"
+    autoupdate.upstream = "https://github.com/new-usemame/cwngsync.koplugin"
     autoupdate.strategy = "latest_github_release"
 
     [resources.sources.calibre]
-    amd64.url = "https://github.com/YunoHost-Apps/calibreweb-automated_ynh/releases/download/v9.13.0/calibre-9.13.0-x86_64.txz"
-    amd64.sha256 = "d664fe74953463f1b679945a5460234b61cbf539da48fc78f2111ff8d9503cc0"
-    arm64.url = "https://github.com/YunoHost-Apps/calibreweb-automated_ynh/releases/download/v9.13.0/calibre-9.13.0-arm64.txz"
-    arm64.sha256 = "a700fd765309b5b0fe5725ad907159fe77832f4a78fee59e34eeb31b8002cb7a"
+    amd64.url = "https://github.com/Thovi98/calibre-backup/releases/download/v9.19.0/calibre-9.19.0-x86_64.txz"
+    amd64.sha256 = "35c1cbda1a2548aceeb89cb0a4be47a36025b5dc102ac046f7eaf98ba46a452d"
+    arm64.url = "https://github.com/Thovi98/calibre-backup/releases/download/v9.19.0/calibre-9.19.0-arm64.txz"
+    arm64.sha256 = "8de5c5d3af3f28e0227e215a27e8d69c14c50a38cc3065b249996997df392a2f"
 
-    extract = false
-    rename = "calibre.txz"
+    in_subdir = false
+
     # We sync release from official repo https://github.com/kovidgoyal/calibre because they only keep the assets of latest version…
     autoupdate.upstream = "https://github.com/Thovi98/calibre-backup"
     autoupdate.strategy = "latest_github_release"

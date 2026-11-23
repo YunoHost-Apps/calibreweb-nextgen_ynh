@@ -1,1 +1,1 @@
-This is a dummy description of this app features
+Calibre-Web-NextGen (CWNG) is a self-hosted ebook library you use from a browser, an e-reader or any OPDS app.
